@@ -1,0 +1,22 @@
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f5f8f5;
+}
+
+.bg-verde {
+  background-color: #174d38;
+}
+
+.text-verde {
+  color: #216448;
+}
+
+.card {
+  border-radius: 0.9rem;
+}
+
+.card-body {
+  padding: 1.5rem;
+}
