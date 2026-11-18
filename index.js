@@ -1,5 +1,7 @@
 import express from "express";
 
+import { conectarBanco } from "./config/conexao.js";
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -14,6 +16,8 @@ const integrantes = ["Roger Morony Martins"];
 app.get("/", (req, res) => {
   res.render("index", { titulo: "Painel inicial", integrantes });
 });
+
+await conectarBanco();
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`SisMudas em execução: http://localhost:${PORT}`);
