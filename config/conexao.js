@@ -1,7 +1,5 @@
 import mongoose from "mongoose";
 
-// Preparado para a etapa de integração com o banco de dados.
-// Nesta primeira etapa, a página inicial funciona sem uma conexão ativa.
 export async function conectarBanco() {
   const uri = process.env.MONGODB_URI;
   if (!uri) {
