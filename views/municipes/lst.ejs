@@ -5,59 +5,61 @@
     <a href="/municipes/add" class="btn btn-success">Novo cadastro</a>
   </div>
 
-  <form action="/municipes/lst" method="GET" class="mb-4">
-    <div class="input-group">
-      <input type="text" name="busca" class="form-control" placeholder="Pesquisar por nome ou CPF" value="<%= busca %>">
-      <button type="submit" class="btn btn-success">Pesquisar</button>
-      <a href="/municipes/lst" class="btn btn-secondary">Limpar</a>
-    </div>
-  </form>
 
-  <% if (atualizado) { %>
-    <div class="alert alert-success" role="alert">
-      Cadastro atualizado com sucesso!
-    </div>
-    <% } %>
+      <form action="/municipes/lst" method="GET" class="mb-4">
+        <div class="input-group">
+          <input type="text" name="busca" class="form-control" placeholder="Pesquisar por nome ou CPF"
+            value="<%= busca %>">
+          <button type="submit" class="btn btn-success">Pesquisar</button>
+          <a href="/municipes/lst" class="btn btn-secondary">Limpar</a>
+        </div>
+      </form>
 
-      <div class="table-responsive">
-        <table class="table table-striped table-bordered">
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>Bairro</th>
-              <th>Município</th>
-              <th>Ação</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% municipes.forEach(municipe=> { %>
-              <tr>
-                <td>
-                  <%= municipe.nome %>
-                </td>
-                <td>
-                  <%= municipe.bairro || "Não informado" %>
-                </td>
-                <td>
-                  <%= municipe.municipio %>
-                </td>
-                <td>
-                  <a href="/municipes/edit/<%= municipe._id %>" class="btn btn-sm btn-outline-success">
-                    Editar
-                  </a>
-                </td>
-              </tr>
-              <% }) %>
-          </tbody>
-        </table>
-      </div>
-
-      <% if (municipes.length===0) { %>
-        <p>
-          <%= busca ? "Nenhum munícipe encontrado." : "Nenhum munícipe cadastrado." %>
-        </p>
+      <% if (atualizado) { %>
+        <div class="alert alert-success" role="alert">
+          Cadastro atualizado com sucesso!
+        </div>
         <% } %>
 
-          <a href="/" class="btn btn-secondary">Voltar ao início</a>
+          <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Bairro</th>
+                  <th>Município</th>
+                  <th>Ação</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% municipes.forEach(municipe=> { %>
+                  <tr>
+                    <td>
+                      <%= municipe.nome %>
+                    </td>
+                    <td>
+                      <%= municipe.bairro || "Não informado" %>
+                    </td>
+                    <td>
+                      <%= municipe.municipio %>
+                    </td>
+                    <td>
+                      <a href="/municipes/edit/<%= municipe._id %>" class="btn btn-sm btn-outline-success">
+                        Editar
+                      </a>
+                    </td>
+                  </tr>
+                  <% }) %>
+              </tbody>
+            </table>
+          </div>
 
-          <%- include("../partials/rodape") %>
+          <% if (municipes.length===0) { %>
+            <p>
+              <%= busca ? "Nenhum munícipe encontrado." : "Nenhum munícipe cadastrado." %>
+            </p>
+            <% } %>
+
+              <a href="/" class="btn btn-secondary">Voltar ao início</a>
+
+              <%- include("../partials/rodape") %>
