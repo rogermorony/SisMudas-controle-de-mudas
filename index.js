@@ -18,7 +18,7 @@ app.get("/", (req, res) => {
 
 app.get("/municipes/add", (req, res) => {
   res.render("municipes/add", {
-    titulo: "Cadastrar Munícipe"
+    titulo: "Cadastrar Munícipe",
   });
 });
 
@@ -32,7 +32,7 @@ app.post("/municipes/add", async (req, res) => {
       logradouro,
       numero,
       complemento,
-      bairro
+      bairro,
     } = req.body;
 
     await Municipe.create({
@@ -43,20 +43,22 @@ app.post("/municipes/add", async (req, res) => {
       logradouro,
       numero,
       complemento,
-      bairro
+      bairro,
     });
 
     res.render("municipes/addok", {
       titulo: "Cadastro realizado",
-      nome
+      nome,
     });
-
   } catch (erro) {
     console.error("Erro ao cadastrar munícipe:", erro);
-    res.status(400).send("Não foi possível realizar o cadastro. Verifique os dados informados.");
+    res
+      .status(400)
+      .send(
+        "Não foi possível realizar o cadastro. Verifique os dados informados.",
+      );
   }
 });
-
 
 app.get("/municipes/lst", async (req, res) => {
   try {
@@ -66,10 +68,7 @@ app.get("/municipes/lst", async (req, res) => {
 
     if (busca) {
       filtro = {
-        $or: [
-          { nome: { $regex: busca, $options: "i" } },
-          { cpf: busca }
-        ]
+        $or: [{ nome: { $regex: busca, $options: "i" } }, { cpf: busca }],
       };
     }
 
@@ -78,12 +77,60 @@ app.get("/municipes/lst", async (req, res) => {
     res.render("municipes/lst", {
       titulo: "Munícipes cadastrados",
       municipes,
-      busca
+      busca,
+      atualizado: req.query.atualizado === "1",
     });
-
   } catch (erro) {
     console.error("Erro ao listar munícipes:", erro);
     res.status(500).send("Não foi possível carregar a lista de munícipes.");
+  }
+});
+
+app.get("/municipes/edit/:id", async (req, res) => {
+  try {
+    const municipe = await Municipe.findById(req.params.id);
+
+    if (!municipe) {
+      return res.status(404).send("Munícipe não encontrado.");
+    }
+
+    res.render("municipes/edit", {
+      titulo: "Editar Munícipe",
+      municipe,
+    });
+  } catch (erro) {
+    console.error("Erro ao consultar munícipe:", erro);
+    res.status(400).send("Não foi possível consultar o munícipe.");
+  }
+});
+
+app.post("/municipes/edit/:id", async (req, res) => {
+  try {
+    const { nome, telefone, cep, logradouro, numero, complemento, bairro } =
+      req.body;
+
+    const municipe = await Municipe.findByIdAndUpdate(
+      req.params.id,
+      {
+        nome,
+        telefone,
+        cep,
+        logradouro,
+        numero,
+        complemento,
+        bairro,
+      },
+      { runValidators: true },
+    );
+
+    if (!municipe) {
+      return res.status(404).send("Munícipe não encontrado.");
+    }
+
+    res.redirect("/municipes/lst?atualizado=1");
+  } catch (erro) {
+    console.error("Erro ao atualizar munícipe:", erro);
+    res.status(400).send("Não foi possível atualizar o cadastro.");
   }
 });
 
