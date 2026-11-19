@@ -57,6 +57,36 @@ app.post("/municipes/add", async (req, res) => {
   }
 });
 
+
+app.get("/municipes/lst", async (req, res) => {
+  try {
+    const busca = (req.query.busca || "").trim();
+
+    let filtro = {};
+
+    if (busca) {
+      filtro = {
+        $or: [
+          { nome: { $regex: busca, $options: "i" } },
+          { cpf: busca }
+        ]
+      };
+    }
+
+    const municipes = await Municipe.find(filtro);
+
+    res.render("municipes/lst", {
+      titulo: "Munícipes cadastrados",
+      municipes,
+      busca
+    });
+
+  } catch (erro) {
+    console.error("Erro ao listar munícipes:", erro);
+    res.status(500).send("Não foi possível carregar a lista de munícipes.");
+  }
+});
+
 await conectarBanco();
 
 app.listen(PORT, "0.0.0.0", () => {
