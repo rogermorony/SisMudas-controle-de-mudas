@@ -19,6 +19,8 @@ app.get("/", (req, res) => {
 app.get("/municipes/add", (req, res) => {
   res.render("municipes/add", {
     titulo: "Cadastrar Munícipe",
+    erro: null,
+    dados: {},
   });
 });
 
@@ -51,12 +53,21 @@ app.post("/municipes/add", async (req, res) => {
       nome,
     });
   } catch (erro) {
-    console.error("Erro ao cadastrar munícipe:", erro);
-    res
-      .status(400)
-      .send(
-        "Não foi possível realizar o cadastro. Verifique os dados informados.",
-      );
+    if (erro.code === 11000) {
+      return res.status(409).render("municipes/add", {
+        titulo: "Cadastrar Munícipe",
+        erro: "Este CPF já está cadastrado no sistema.",
+        dados: req.body,
+      });
+    }
+
+    console.error("Erro ao cadastrar munícipe:", erro.name);
+
+    res.status(400).render("municipes/add", {
+      titulo: "Cadastrar Munícipe",
+      erro: "Não foi possível realizar o cadastro. Verifique os dados informados.",
+      dados: req.body,
+    });
   }
 });
 
