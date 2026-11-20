@@ -1,0 +1,39 @@
+<%- include("../partials/cabecalho", { titulo }) %>
+
+<h1 class="h3 mb-4">Editar Espécie</h1>
+
+<form action="/especies/edit/<%= especie._id %>" method="POST">
+
+  <div class="mb-3">
+    <label for="nomePopular" class="form-label">Nome popular</label>
+    <input type="text" class="form-control"
+      id="nomePopular" name="nomePopular"
+      value="<%= especie.nomePopular %>" required>
+  </div>
+
+  <div class="mb-3">
+    <label for="nomeCientifico" class="form-label">Nome científico</label>
+    <input type="text" class="form-control"
+      id="nomeCientifico" name="nomeCientifico"
+      value="<%= especie.nomeCientifico || '' %>">
+  </div>
+
+  <div class="mb-3">
+    <label for="estoque" class="form-label">Quantidade disponível</label>
+    <input type="number" class="form-control"
+      id="estoque" name="estoque"
+      min="0" step="1"
+      value="<%= especie.estoque %>" required>
+  </div>
+
+  <button type="submit" class="btn btn-success">
+    Salvar alterações
+  </button>
+
+  <a href="/especies/lst" class="btn btn-secondary">
+    Cancelar
+  </a>
+
+</form>
+
+<%- include("../partials/rodape") %>
