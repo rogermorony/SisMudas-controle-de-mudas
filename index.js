@@ -1,6 +1,7 @@
 import express from "express";
 import { conectarBanco } from "./config/conexao.js";
 import Municipe from "./models/Municipe.js";
+import Especie from "./models/Especie.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -142,6 +143,60 @@ app.post("/municipes/edit/:id", async (req, res) => {
   } catch (erro) {
     console.error("Erro ao atualizar munícipe:", erro);
     res.status(400).send("Não foi possível atualizar o cadastro.");
+  }
+});
+
+app.get("/especies/add", (req, res) => {
+  res.render("especies/add", {
+    titulo: "Cadastrar Espécie",
+  });
+});
+
+app.post("/especies/add", async (req, res) => {
+  try {
+    const { nomePopular, nomeCientifico, estoque } = req.body;
+
+    await Especie.create({
+      nomePopular,
+      nomeCientifico,
+      estoque,
+    });
+
+    res.render("especies/addok", {
+      titulo: "Espécie cadastrada",
+      nomePopular,
+    });
+  } catch (erro) {
+    console.error("Erro ao cadastrar espécie:", erro);
+    res.status(400).send("Não foi possível cadastrar a espécie.");
+  }
+});
+
+app.get("/especies/lst", async (req, res) => {
+  try {
+    const busca = (req.query.busca || "").trim();
+
+    let filtro = {};
+
+    if (busca) {
+      filtro = {
+        $or: [
+          { nomePopular: { $regex: busca, $options: "i" } },
+          { nomeCientifico: { $regex: busca, $options: "i" } },
+        ],
+      };
+    }
+
+    const especies = await Especie.find(filtro);
+
+    res.render("especies/lst", {
+      titulo: "Espécies cadastradas",
+      especies,
+      busca,
+    });
+  } catch (erro) {
+    console.error("Erro ao listar espécies:", erro);
+    res.status(500).send("Não foi possível carregar a lista de espécies.");
   }
 });
 

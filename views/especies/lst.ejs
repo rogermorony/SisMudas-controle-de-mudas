@@ -1,0 +1,62 @@
+<%- include("../partials/cabecalho", { titulo }) %>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Espécies cadastradas</h1>
+        <a href="/especies/add" class="btn btn-success">Nova espécie</a>
+    </div>
+
+    <form action="/especies/lst" method="GET" class="mb-4">
+        <div class="input-group">
+            <input type="text" name="busca" class="form-control" placeholder="Pesquisar por nome popular ou científico"
+                value="<%= busca %>">
+
+            <button type="submit" class="btn btn-success">
+                Pesquisar
+            </button>
+
+            <a href="/especies/lst" class="btn btn-secondary">
+                Limpar
+            </a>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Nome popular</th>
+                    <th>Nome científico</th>
+                    <th>Estoque</th>
+                    <th>Situação</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% especies.forEach(especie=> { %>
+                    <tr>
+                        <td>
+                            <%= especie.nomePopular %>
+                        </td>
+                        <td>
+                            <%= especie.nomeCientifico || "Não informado" %>
+                        </td>
+                        <td>
+                            <%= especie.estoque %>
+                        </td>
+                        <td>
+                            <%= especie.ativa ? "Ativa" : "Inativa" %>
+                        </td>
+                    </tr>
+                    <% }) %>
+            </tbody>
+        </table>
+    </div>
+
+    <% if (especies.length===0) { %>
+        <p>
+            <%= busca ? "Nenhuma espécie encontrada." : "Nenhuma espécie cadastrada." %>
+        </p>
+        <% } %>
+
+            <a href="/" class="btn btn-secondary">Voltar ao início</a>
+
+            <%- include("../partials/rodape") %>

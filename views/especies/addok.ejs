@@ -1,0 +1,17 @@
+<%- include("../partials/cabecalho", { titulo }) %>
+
+  <h1 class="h3 mb-4">Cadastro realizado</h1>
+
+  <p>Espécie <strong>
+      <%= nomePopular %>
+    </strong> cadastrada com sucesso!</p>
+
+  <a href="/especies/add" class="btn btn-success">
+    Novo cadastro
+  </a>
+
+  <a href="/especies/lst" class="btn btn-secondary">
+    Ver espécies cadastradas
+  </a>
+
+  <%- include("../partials/rodape") %>
