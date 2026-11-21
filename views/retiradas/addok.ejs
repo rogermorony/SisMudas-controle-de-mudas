@@ -1,0 +1,21 @@
+<%- include("../partials/cabecalho", { titulo }) %>
+
+<h1 class="h3 mb-4">Retirada registrada</h1>
+
+<div class="alert alert-success" role="alert">
+  Retirada realizada com sucesso!
+</div>
+
+<p><strong>Munícipe:</strong> <%= nome %></p>
+<p><strong>Espécie:</strong> <%= especie %></p>
+<p><strong>Quantidade:</strong> <%= quantidade %> muda(s)</p>
+
+<a href="/retiradas/add" class="btn btn-success">
+  Nova retirada
+</a>
+
+<a href="/" class="btn btn-secondary">
+  Voltar ao início
+</a>
+
+<%- include("../partials/rodape") %>

@@ -1,0 +1,47 @@
+<%- include("../partials/cabecalho", { titulo }) %>
+
+  <h1 class="h3 mb-4">Registrar Retirada</h1>
+
+  <% if (erro) { %>
+    <div class="alert alert-danger" role="alert">
+      <%= erro %>
+    </div>
+    <% } %>
+
+      <form action="/retiradas/add" method="POST">
+
+        <div class="mb-3">
+          <label for="municipeId" class="form-label">Munícipe</label>
+          <select class="form-select" id="municipeId" name="municipeId" required>
+            <option value="">Selecione um munícipe</option>
+            <% municipes.forEach(municipe=> { %>
+              <option value="<%= municipe._id %>">
+                <%= municipe.nome %>
+              </option>
+              <% }) %>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label for="especieId" class="form-label">Espécie</label>
+          <select class="form-select" id="especieId" name="especieId" required>
+            <option value="">Selecione uma espécie</option>
+            <% especies.forEach(especie=> { %>
+              <option value="<%= especie._id %>">
+                <%= especie.nomePopular %> - <%= especie.estoque %> disponíveis
+              </option>
+              <% }) %>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label for="quantidade" class="form-label">Quantidade de mudas</label>
+          <input type="number" class="form-control" id="quantidade" name="quantidade" min="1" max="5" step="1" required>
+        </div>
+
+        <button type="submit" class="btn btn-success">Registrar retirada</button>
+        <a href="/" class="btn btn-secondary">Cancelar</a>
+
+      </form>
+
+      <%- include("../partials/rodape") %>
