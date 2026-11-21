@@ -1,56 +1,74 @@
 <%- include("../partials/cabecalho", { titulo }) %>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h1 class="h3 mb-0">Histórico de Retiradas</h1>
-  <a href="/retiradas/add" class="btn btn-success">Nova retirada</a>
-</div>
-
-<form action="/retiradas/lst" method="GET" class="mb-4">
-  <div class="input-group">
-    <input type="text" name="busca" class="form-control"
-      placeholder="Pesquisar por nome do munícipe"
-      value="<%= busca %>">
-
-    <button type="submit" class="btn btn-success">Pesquisar</button>
-    <a href="/retiradas/lst" class="btn btn-secondary">Limpar</a>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Histórico de Retiradas</h1>
+    <a href="/retiradas/add" class="btn btn-success">Nova retirada</a>
   </div>
-</form>
 
-<div class="table-responsive">
-  <table class="table table-striped table-bordered">
-    <thead>
-      <tr>
-        <th>Data</th>
-        <th>Munícipe</th>
-        <th>Espécie</th>
-        <th>Quantidade</th>
-        <th>Situação</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% retiradas.forEach(retirada => { %>
+  <form action="/retiradas/lst" method="GET" class="mb-4">
+    <div class="input-group">
+      <input type="text" name="busca" class="form-control" placeholder="Pesquisar por nome do munícipe"
+        value="<%= busca %>">
+
+      <button type="submit" class="btn btn-success">Pesquisar</button>
+      <a href="/retiradas/lst" class="btn btn-secondary">Limpar</a>
+    </div>
+  </form>
+
+  <div class="table-responsive">
+    <table class="table table-striped table-bordered">
+      <thead>
         <tr>
-          <td>
-            <%= retirada.dataRetirada.toLocaleDateString("pt-BR", {
-              timeZone: "America/Sao_Paulo"
-            }) %>
-          </td>
-          <td><%= retirada.municipeId?.nome || "Não encontrado" %></td>
-          <td><%= retirada.especieId?.nomePopular || "Não encontrada" %></td>
-          <td><%= retirada.quantidade %></td>
-          <td><%= retirada.situacao %></td>
+          <th>Data</th>
+          <th>Munícipe</th>
+          <th>Espécie</th>
+          <th>Quantidade</th>
+          <th>Situação</th>
         </tr>
-      <% }) %>
-    </tbody>
-  </table>
-</div>
+      </thead>
+      <tbody>
+        <% retiradas.forEach(retirada=> { %>
+          <tr>
+            <td>
+              <%= retirada.dataRetirada.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" }) %>
+            </td>
+            <td>
+              <%= retirada.municipeId?.nome || "Não encontrado" %>
+            </td>
 
-<% if (retiradas.length === 0) { %>
-  <p>
-    <%= busca ? "Nenhuma retirada encontrada." : "Nenhuma retirada registrada." %>
-  </p>
-<% } %>
+            <td>
+              <% if (retirada.itens && retirada.itens.length> 0) { %>
+                <% retirada.itens.forEach(item=> { %>
+                  <div>
+                    <%= item.especieId?.nomePopular || "Não encontrada" %>
+                  </div>
+                  <% }) %>
+                    <% } else { %>
+                      <%= retirada.especieId?.nomePopular || "Não encontrada" %>
+                        <% } %>
+            </td>
+            <td>
+              <% if (retirada.itens && retirada.itens.length> 0) { %>
+                <%= retirada.itens.reduce((total, item)=> total + item.quantidade, 0) %>
+                  <% } else { %>
+                    <%= retirada.quantidade %>
+                      <% } %>
+            </td>
+            <td>
+              <%= retirada.situacao %>
+            </td>
+          </tr>
+          <% }) %>
+      </tbody>
+    </table>
+  </div>
 
-<a href="/" class="btn btn-secondary">Voltar ao início</a>
+  <% if (retiradas.length===0) { %>
+    <p>
+      <%= busca ? "Nenhuma retirada encontrada." : "Nenhuma retirada registrada." %>
+    </p>
+    <% } %>
 
-<%- include("../partials/rodape") %>
+      <a href="/" class="btn btn-secondary">Voltar ao início</a>
+
+      <%- include("../partials/rodape") %>

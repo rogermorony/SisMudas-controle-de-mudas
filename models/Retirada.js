@@ -1,5 +1,19 @@
 import mongoose from "mongoose";
 
+const itemSchema = new mongoose.Schema({
+  especieId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Especie",
+    required: true
+  },
+  quantidade: {
+    type: Number,
+    required: true,
+    min: 1,
+    max: 5
+  }
+}, { _id: false });
+
 const retiradaSchema = new mongoose.Schema({
   municipeId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -9,10 +23,26 @@ const retiradaSchema = new mongoose.Schema({
   especieId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Especie",
-    required: true
+    required: function () {
+      return !this.itens || this.itens.length === 0;
+    }
   },
-  quantidade: { type: Number, required: true, min: 1 },
-  dataRetirada: { type: Date, required: true, default: Date.now },
+  quantidade: {
+    type: Number,
+    min: 1,
+    required: function () {
+      return !this.itens || this.itens.length === 0;
+    }
+  },
+  itens: {
+    type: [itemSchema],
+    default: undefined
+  },
+  dataRetirada: {
+    type: Date,
+    required: true,
+    default: Date.now
+  },
   situacao: {
     type: String,
     required: true,
