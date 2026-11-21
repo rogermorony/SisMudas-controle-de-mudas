@@ -1,38 +1,84 @@
 <%- include("partials/cabecalho", { titulo }) %>
 
 <section class="mb-4">
-  <p class="text-uppercase text-verde fw-semibold small mb-2">Painel administrativo</p>
-  <h1 class="display-6 fw-bold mb-3">Sistema de Controle de Distribuição de Mudas</h1>
+  <p class="text-uppercase text-verde fw-semibold small mb-2">
+    Painel administrativo
+  </p>
+
+  <h1 class="display-6 fw-bold mb-3">
+    Sistema de Controle de Distribuição de Mudas
+  </h1>
+
   <p class="lead text-secondary mb-0">
     Sistema de gerenciamento de munícipes, espécies e distribuição de mudas.
   </p>
 </section>
 
 <div class="row g-3 mb-4">
+
   <div class="col-md-4">
     <section class="card h-100 shadow-sm border-0">
-      <div class="card-body">
+      <div class="card-body d-flex flex-column">
         <h2 class="h5">Munícipes</h2>
-        <p class="text-secondary mb-0">Cadastro e histórico de quem recebe mudas.</p>
+
+        <p class="text-secondary">
+          Cadastro e consulta dos munícipes.
+        </p>
+
+        <div class="d-flex gap-2 flex-wrap mt-auto">
+          <a href="/municipes/add" class="btn btn-success">
+            Cadastrar
+          </a>
+          <a href="/municipes/lst" class="btn btn-outline-success">
+            Consultar
+          </a>
+        </div>
       </div>
     </section>
   </div>
+
   <div class="col-md-4">
     <section class="card h-100 shadow-sm border-0">
-      <div class="card-body">
+      <div class="card-body d-flex flex-column">
         <h2 class="h5">Espécies</h2>
-        <p class="text-secondary mb-0">Registro de espécies e quantidades disponíveis.</p>
+
+        <p class="text-secondary">
+          Cadastro de espécies e controle do estoque.
+        </p>
+
+        <div class="d-flex gap-2 flex-wrap mt-auto">
+          <a href="/especies/add" class="btn btn-success">
+            Cadastrar
+          </a>
+          <a href="/especies/lst" class="btn btn-outline-success">
+            Consultar
+          </a>
+        </div>
       </div>
     </section>
   </div>
+
   <div class="col-md-4">
     <section class="card h-100 shadow-sm border-0">
-      <div class="card-body">
+      <div class="card-body d-flex flex-column">
         <h2 class="h5">Retiradas</h2>
-        <p class="text-secondary mb-0">Registro de entregas e verificação do histórico.</p>
+
+        <p class="text-secondary">
+          Registro de entregas e consulta do histórico.
+        </p>
+
+        <div class="d-flex gap-2 flex-wrap mt-auto">
+          <a href="/retiradas/add" class="btn btn-success">
+            Registrar
+          </a>
+          <a href="/retiradas/lst" class="btn btn-outline-success">
+            Histórico
+          </a>
+        </div>
       </div>
     </section>
   </div>
+
 </div>
 
 <%- include("partials/rodape") %>
