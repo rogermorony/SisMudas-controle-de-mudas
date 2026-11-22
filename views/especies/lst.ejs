@@ -1,74 +1,156 @@
+
 <%- include("../partials/cabecalho", { titulo }) %>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0">Espécies cadastradas</h1>
-        <a href="/especies/add" class="btn btn-success">Nova espécie</a>
-    </div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="h3 mb-0">Espécies cadastradas</h1>
+  <a href="/especies/add" class="btn btn-success">Nova espécie</a>
+</div>
 
-    <% if (atualizado) { %>
-        <div class="alert alert-success" role="alert">
-            Espécie atualizada com sucesso!
-        </div>
-        <% } %>
+<% if (atualizado) { %>
+  <div class="alert alert-success" role="alert">
+    Espécie atualizada com sucesso!
+  </div>
+<% } %>
 
-            <form action="/especies/lst" method="GET" class="mb-4">
-                <div class="input-group">
-                    <input type="text" name="busca" class="form-control"
-                        placeholder="Pesquisar por nome popular ou científico" value="<%= busca %>">
+<% if (bloqueado) { %>
+  <div class="alert alert-danger" role="alert">
+    Não é possível excluir esta espécie porque existem retiradas registradas.
+    Você pode alterar sua situação para Inativa.
+  </div>
+<% } %>
 
-                    <button type="submit" class="btn btn-success">
-                        Pesquisar
-                    </button>
+<% if (excluido) { %>
+  <div class="alert alert-success" role="alert">
+    Espécie excluída com sucesso!
+  </div>
+<% } %>
 
-                    <a href="/especies/lst" class="btn btn-secondary">
-                        Limpar
-                    </a>
-                </div>
-            </form>
+<% if (erroExclusao) { %>
+  <div class="alert alert-danger" role="alert">
+    Não foi possível excluir a espécie.
+  </div>
+<% } %>
 
-            <div class="table-responsive">
-                <table class="table table-striped table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Nome popular</th>
-                            <th>Nome científico</th>
-                            <th>Estoque</th>
-                            <th>Situação</th>
-                            <th>Ação</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% especies.forEach(especie=> { %>
-                            <tr>
-                                <td>
-                                    <%= especie.nomePopular %>
-                                </td>
-                                <td>
-                                    <%= especie.nomeCientifico || "Não informado" %>
-                                </td>
-                                <td>
-                                    <%= especie.estoque %>
-                                </td>
-                                <td>
-                                    <%= especie.ativa ? "Ativa" : "Inativa" %>
-                                </td>
-                                <td>
-                                    <a href="/especies/edit/<%= especie._id %>" class="btn btn-sm btn-outline-success">
-                                        Editar
-                                    </a>
-                                </td>
-                            </tr>
-                            <% }) %>
-                    </tbody>
-                </table>
+<form action="/especies/lst" method="GET" class="mb-4">
+  <div class="input-group">
+    <input type="text" name="busca" class="form-control"
+      placeholder="Pesquisar por nome popular ou científico"
+      value="<%= busca %>">
+
+    <button type="submit" class="btn btn-success">
+      Pesquisar
+    </button>
+
+    <a href="/especies/lst" class="btn btn-secondary">
+      Limpar
+    </a>
+  </div>
+</form>
+
+<div class="table-responsive">
+  <table class="table table-striped table-bordered align-middle">
+    <thead>
+      <tr>
+        <th>Nome popular</th>
+        <th>Nome científico</th>
+        <th>Estoque</th>
+        <th>Situação</th>
+        <th>Ação</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <% especies.forEach(especie => { %>
+        <tr>
+          <td><%= especie.nomePopular %></td>
+
+          <td>
+            <%= especie.nomeCientifico || "Não informado" %>
+          </td>
+
+          <td><%= especie.estoque %></td>
+
+          <td>
+            <%= especie.ativa ? "Ativa" : "Inativa" %>
+          </td>
+
+          <td>
+            <div class="d-flex gap-2">
+              <a href="/especies/edit/<%= especie._id %>"
+                 class="btn btn-sm btn-outline-success">
+                Editar
+              </a>
+
+              <button type="button"
+                class="btn btn-sm btn-outline-danger"
+                data-bs-toggle="modal"
+                data-bs-target="#excluir<%= especie._id %>">
+                Excluir
+              </button>
             </div>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
 
-            <% if (especies.length===0) { %>
-                <p>
-                    <%= busca ? "Nenhuma espécie encontrada." : "Nenhuma espécie cadastrada." %>
-                </p>
-                <% } %>
+<% if (especies.length === 0) { %>
+  <p>
+    <%= busca ? "Nenhuma espécie encontrada." : "Nenhuma espécie cadastrada." %>
+  </p>
+<% } %>
 
-                    <a href="/" class="btn btn-secondary">Voltar ao início</a>
+<% especies.forEach(especie => { %>
+  <div class="modal fade"
+       id="excluir<%= especie._id %>"
+       tabindex="-1"
+       aria-hidden="true">
 
-                    <%- include("../partials/rodape") %>
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h2 class="modal-title fs-5">Excluir espécie</h2>
+
+          <button type="button" class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Fechar">
+          </button>
+        </div>
+
+        <div class="modal-body">
+          Tem certeza de que deseja excluir
+          <strong><%= especie.nomePopular %></strong>?
+
+          <p class="text-secondary mt-2 mb-0">
+            Esta ação não poderá ser desfeita.
+          </p>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal">
+            Cancelar
+          </button>
+
+          <form action="/especies/delete/<%= especie._id %>"
+                method="POST">
+
+            <button type="submit" class="btn btn-danger">
+              Excluir espécie
+            </button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+<% }) %>
+
+<a href="/" class="btn btn-secondary">
+  Voltar ao início
+</a>
+
+<%- include("../partials/rodape") %>

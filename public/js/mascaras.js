@@ -35,3 +35,20 @@ if (telefone) {
     telefone.value = `(${ddd}) ${restante.slice(0, tamanho)}-${restante.slice(tamanho)}`;
   });
 }
+
+const cep = document.getElementById("cep");
+
+if (cep) {
+  function formatarCep() {
+    let valor = cep.value.replace(/\D/g, "").slice(0, 8);
+
+    if (valor.length > 5) {
+      valor = valor.slice(0, 5) + "-" + valor.slice(5);
+    }
+
+    cep.value = valor;
+  }
+
+  cep.addEventListener("input", formatarCep);
+  formatarCep();
+}

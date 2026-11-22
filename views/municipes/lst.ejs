@@ -53,7 +53,9 @@
 
           <td><%= municipe.cpf %></td>
 
-          <td><%= municipe.telefone || "Não informado" %></td>
+          <td>
+            <%= municipe.telefone || "Não informado" %>
+          </td>
 
           <td>
             <% if (municipe.logradouro) { %>
@@ -83,14 +85,12 @@
                 Editar
               </a>
 
-              <form action="/municipes/delete/<%= municipe._id %>"
-                    method="POST"
-                    onsubmit="return confirm('Tem certeza que deseja excluir este munícipe?');">
-
-                <button type="submit" class="btn btn-sm btn-outline-danger">
-                  Excluir
-                </button>
-              </form>
+              <button type="button"
+                class="btn btn-sm btn-outline-danger"
+                data-bs-toggle="modal"
+                data-bs-target="#excluir<%= municipe._id %>">
+                Excluir
+              </button>
             </div>
           </td>
         </tr>
@@ -105,6 +105,56 @@
   </p>
 <% } %>
 
-<a href="/" class="btn btn-secondary">Voltar ao início</a>
+<% municipes.forEach(municipe => { %>
+  <div class="modal fade"
+       id="excluir<%= municipe._id %>"
+       tabindex="-1"
+       aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h2 class="modal-title fs-5">Excluir munícipe</h2>
+
+          <button type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Fechar">
+          </button>
+        </div>
+
+        <div class="modal-body">
+          Tem certeza de que deseja excluir
+          <strong><%= municipe.nome %></strong>?
+
+          <p class="text-secondary mt-2 mb-0">
+            Esta ação não poderá ser desfeita.
+          </p>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal">
+            Cancelar
+          </button>
+
+          <form action="/municipes/delete/<%= municipe._id %>"
+                method="POST">
+            <button type="submit" class="btn btn-danger">
+              Excluir munícipe
+            </button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+<% }) %>
+
+<a href="/" class="btn btn-secondary">
+  Voltar ao início
+</a>
 
 <%- include("../partials/rodape") %>

@@ -175,12 +175,13 @@ app.get("/especies/add", (req, res) => {
 
 app.post("/especies/add", async (req, res) => {
   try {
-    const { nomePopular, nomeCientifico, estoque } = req.body;
+    const { nomePopular, nomeCientifico, estoque, ativa } = req.body;
 
     await Especie.create({
       nomePopular,
       nomeCientifico,
       estoque,
+      ativa: ativa === "true",
     });
 
     res.render("especies/addok", {
@@ -215,7 +216,11 @@ app.get("/especies/lst", async (req, res) => {
       especies,
       busca,
       atualizado: req.query.atualizado === "1",
+      bloqueado: req.query.bloqueado === "1",
+      excluido: req.query.excluido === "1",
+      erroExclusao: req.query.erroExclusao === "1",
     });
+    
   } catch (erro) {
     console.error("Erro ao listar espécies:", erro);
     res.status(500).send("Não foi possível carregar a lista de espécies.");
@@ -242,7 +247,7 @@ app.get("/especies/edit/:id", async (req, res) => {
 
 app.post("/especies/edit/:id", async (req, res) => {
   try {
-    const { nomePopular, nomeCientifico, estoque } = req.body;
+    const { nomePopular, nomeCientifico, estoque, ativa } = req.body;
 
     const especie = await Especie.findByIdAndUpdate(
       req.params.id,
@@ -250,6 +255,7 @@ app.post("/especies/edit/:id", async (req, res) => {
         nomePopular,
         nomeCientifico,
         estoque,
+        ativa: ativa === "true",
       },
       { runValidators: true },
     );
@@ -262,6 +268,29 @@ app.post("/especies/edit/:id", async (req, res) => {
   } catch (erro) {
     console.error("Erro ao atualizar espécie:", erro);
     res.status(400).send("Não foi possível atualizar a espécie.");
+  }
+});
+
+app.post("/especies/delete/:id", async (req, res) => {
+  try {
+    const retirada = await Retirada.findOne({
+      $or: [{ especieId: req.params.id }, { "itens.especieId": req.params.id }],
+    });
+
+    if (retirada) {
+      return res.redirect("/especies/lst?bloqueado=1");
+    }
+
+    const especie = await Especie.findByIdAndDelete(req.params.id);
+
+    if (!especie) {
+      return res.redirect("/especies/lst?erroExclusao=1");
+    }
+
+    res.redirect("/especies/lst?excluido=1");
+  } catch (erro) {
+    console.error("Erro ao excluir espécie:", erro);
+    res.redirect("/especies/lst?erroExclusao=1");
   }
 });
 
