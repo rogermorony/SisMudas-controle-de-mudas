@@ -92,6 +92,8 @@ app.get("/municipes/lst", async (req, res) => {
       municipes,
       busca,
       atualizado: req.query.atualizado === "1",
+      bloqueado: req.query.bloqueado === "1",
+      excluido: req.query.excluido === "1",
     });
   } catch (erro) {
     console.error("Erro ao listar munícipes:", erro);
@@ -144,6 +146,24 @@ app.post("/municipes/edit/:id", async (req, res) => {
   } catch (erro) {
     console.error("Erro ao atualizar munícipe:", erro);
     res.status(400).send("Não foi possível atualizar o cadastro.");
+  }
+});
+
+app.post("/municipes/delete/:id", async (req, res) => {
+  try {
+    const retirada = await Retirada.findOne({
+      municipeId: req.params.id,
+    });
+
+    if (retirada) {
+      return res.redirect("/municipes/lst?bloqueado=1");
+    }
+
+    await Municipe.findByIdAndDelete(req.params.id);
+    res.redirect("/municipes/lst?excluido=1");
+  } catch (erro) {
+    console.error("Erro ao excluir munícipe:", erro);
+    res.redirect("/municipes/lst?bloqueado=1");
   }
 });
 

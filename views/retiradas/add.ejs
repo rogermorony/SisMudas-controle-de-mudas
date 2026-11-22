@@ -1,85 +1,76 @@
 <%- include("../partials/cabecalho", { titulo }) %>
 
-<h1 class="h3 mb-4">Registrar Retirada</h1>
+  <h1 class="h3 mb-4">Registrar Retirada</h1>
 
-<% if (erro) { %>
-  <div class="alert alert-danger" role="alert">
-    <%= erro %>
-  </div>
-<% } %>
-
-<form action="/retiradas/add" method="POST">
-
-  <div class="mb-4">
-    <label for="municipeId" class="form-label">Munícipe</label>
-    <select class="form-select" id="municipeId" name="municipeId" required>
-      <option value="">Selecione um munícipe</option>
-      <% municipes.forEach(municipe => { %>
-        <option value="<%= municipe._id %>">
-          <%= municipe.nome %>
-        </option>
-      <% }) %>
-    </select>
-  </div>
-
-  <h2 class="h5 mb-3">Mudas para retirada</h2>
-
-  <% for (let i = 1; i <= 5; i++) { %>
-
-    <div class="row g-3 mb-3">
-
-      <div class="col-md-8">
-        <label for="especie<%= i %>" class="form-label">
-          Espécie <%= i %>
-        </label>
-
-        <select class="form-select"
-          id="especie<%= i %>"
-          name="especieIds[]"
-          <%= i === 1 ? "required" : "" %>>
-
-          <option value="">Selecione uma espécie</option>
-
-          <% especies.forEach(especie => { %>
-            <option value="<%= especie._id %>">
-              <%= especie.nomePopular %> - <%= especie.estoque %> disponíveis
-            </option>
-          <% }) %>
-
-        </select>
-      </div>
-
-      <div class="col-md-4">
-        <label for="quantidade<%= i %>" class="form-label">
-          Quantidade
-        </label>
-
-        <input type="number"
-          class="form-control"
-          id="quantidade<%= i %>"
-          name="quantidades[]"
-          min="1"
-          max="5"
-          step="1"
-          <%= i === 1 ? "required" : "" %>>
-      </div>
-
+  <% if (erro) { %>
+    <div class="alert alert-danger" role="alert">
+      <%= erro %>
     </div>
+    <% } %>
 
-  <% } %>
+      <form action="/retiradas/add" method="POST">
 
-  <p class="text-secondary small mb-4">
-    Limite de 5 mudas por retirada. Preencha apenas as espécies desejadas.
-  </p>
+        <div class="mb-4">
+          <label for="municipeId" class="form-label">Munícipe</label>
+          <select class="form-select" id="municipeId" name="municipeId" required>
+            <option value="">Selecione um munícipe</option>
+            <% municipes.forEach(municipe=> { %>
+              <option value="<%= municipe._id %>">
+                <%= municipe.nome %> - CPF: <%= municipe.cpf %>
+              </option>
+              <% }) %>
+          </select>
+        </div>
 
-  <button type="submit" class="btn btn-success">
-    Registrar retirada
-  </button>
+        <h2 class="h5 mb-3">Mudas para retirada</h2>
 
-  <a href="/" class="btn btn-secondary">
-    Cancelar
-  </a>
+        <% for (let i=1; i <=5; i++) { %>
 
-</form>
+          <div class="row g-3 mb-3">
 
-<%- include("../partials/rodape") %>
+            <div class="col-md-8">
+              <label for="especie<%= i %>" class="form-label">
+                Espécie <%= i %>
+              </label>
+
+              <select class="form-select" id="especie<%= i %>" name="especieIds[]" <%=i===1 ? "required" : "" %>>
+
+                <option value="">Selecione uma espécie</option>
+
+                <% especies.forEach(especie=> { %>
+                  <option value="<%= especie._id %>">
+                    <%= especie.nomePopular %> - <%= especie.estoque %> disponíveis
+                  </option>
+                  <% }) %>
+
+              </select>
+            </div>
+
+            <div class="col-md-4">
+              <label for="quantidade<%= i %>" class="form-label">
+                Quantidade
+              </label>
+
+              <input type="number" class="form-control" id="quantidade<%= i %>" name="quantidades[]" min="1" max="5"
+                step="1" <%=i===1 ? "required" : "" %>>
+            </div>
+
+          </div>
+
+          <% } %>
+
+            <p class="text-secondary small mb-4">
+              Limite de 5 mudas por retirada. Preencha apenas as espécies desejadas.
+            </p>
+
+            <button type="submit" class="btn btn-success">
+              Registrar retirada
+            </button>
+
+            <a href="/" class="btn btn-secondary">
+              Cancelar
+            </a>
+
+      </form>
+
+      <%- include("../partials/rodape") %>
