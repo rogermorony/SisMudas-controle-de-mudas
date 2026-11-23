@@ -3,6 +3,7 @@ import { conectarBanco } from "./config/conexao.js";
 import Municipe from "./models/Municipe.js";
 import Especie from "./models/Especie.js";
 import Retirada from "./models/Retirada.js";
+import mongoose from "mongoose";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -220,7 +221,6 @@ app.get("/especies/lst", async (req, res) => {
       excluido: req.query.excluido === "1",
       erroExclusao: req.query.erroExclusao === "1",
     });
-    
   } catch (erro) {
     console.error("Erro ao listar espécies:", erro);
     res.status(500).send("Não foi possível carregar a lista de espécies.");
@@ -501,10 +501,275 @@ app.get("/retiradas/lst", async (req, res) => {
       titulo: "Histórico de Retiradas",
       retiradas,
       busca,
+      excluido: req.query.excluido === "1",
+      erroExclusao: req.query.erroExclusao === "1",
+      atualizado: req.query.atualizado === "1",
     });
   } catch (erro) {
     console.error("Erro ao listar retiradas:", erro);
     res.status(500).send("Não foi possível carregar o histórico de retiradas.");
+  }
+});
+
+app.post("/retiradas/delete/:id", async (req, res) => {
+  try {
+    await mongoose.connection.transaction(async (session) => {
+      const retirada = await Retirada.findById(req.params.id).session(session);
+
+      if (!retirada) {
+        throw new Error("Retirada não encontrada.");
+      }
+
+      if (retirada.situacao === "Concluída") {
+        const itens = retirada.itens?.length
+          ? retirada.itens
+          : [
+              {
+                especieId: retirada.especieId,
+                quantidade: retirada.quantidade,
+              },
+            ];
+
+        for (const item of itens) {
+          const resultado = await Especie.updateOne(
+            { _id: item.especieId },
+            { $inc: { estoque: item.quantidade } },
+            { session },
+          );
+
+          if (resultado.matchedCount !== 1) {
+            throw new Error("Espécie não encontrada no estoque.");
+          }
+        }
+      }
+
+      await Retirada.findByIdAndDelete(retirada._id, { session });
+    });
+
+    res.redirect("/retiradas/lst?excluido=1");
+  } catch (erro) {
+    console.error("Erro ao excluir retirada:", erro);
+    res.redirect("/retiradas/lst?erroExclusao=1");
+  }
+});
+
+app.get("/retiradas/edit/:id", async (req, res) => {
+  try {
+    const retirada = await Retirada.findById(req.params.id).populate(
+      "municipeId",
+      "nome cpf",
+    );
+
+    if (!retirada) {
+      return res.status(404).send("Retirada não encontrada.");
+    }
+
+    if (retirada.situacao !== "Concluída") {
+      return res.status(400).send("Esta retirada não pode ser editada.");
+    }
+
+    const itensAtuais = (
+      retirada.itens?.length
+        ? retirada.itens
+        : [
+            {
+              especieId: retirada.especieId,
+              quantidade: retirada.quantidade,
+            },
+          ]
+    ).map((item) => ({
+      especieId: String(item.especieId),
+      quantidade: item.quantidade,
+    }));
+
+    const especies = await Especie.find({
+      $or: [
+        { ativa: true, estoque: { $gt: 0 } },
+        { _id: { $in: itensAtuais.map((item) => item.especieId) } },
+      ],
+    }).sort({ nomePopular: 1 });
+
+    const mensagens = {
+      dados: "Verifique as espécies e quantidades informadas.",
+      limite: "O limite é de 5 mudas por período de 30 dias.",
+      estoque:
+        "Uma das espécies está inativa ou não possui estoque suficiente.",
+      falha: "Não foi possível atualizar a retirada.",
+    };
+
+    res.render("retiradas/edit", {
+      titulo: "Editar Retirada",
+      retirada,
+      itensAtuais,
+      especies,
+      erro: mensagens[req.query.erro] || null,
+    });
+    
+  } catch (erro) {
+    console.error("Erro ao carregar retirada:", erro);
+    res.status(400).send("Não foi possível carregar a retirada.");
+  }
+});
+
+app.post("/retiradas/edit/:id", async (req, res) => {
+  const voltar = (erro) => {
+    res.redirect(`/retiradas/edit/${req.params.id}?erro=${erro}`);
+  };
+
+  const especieIds = req.body.especieIds || [];
+  const quantidades = req.body.quantidades || [];
+  const itens = [];
+  let total = 0;
+
+  for (let i = 0; i < especieIds.length; i++) {
+    const especieId = especieIds[i];
+    const valor = quantidades[i];
+
+    if (!especieId && !valor) {
+      continue;
+    }
+
+    const quantidade = Number(valor);
+
+    if (
+      !mongoose.isValidObjectId(especieId) ||
+      !valor ||
+      !Number.isInteger(quantidade) ||
+      quantidade < 1 ||
+      quantidade > 5
+    ) {
+      return voltar("dados");
+    }
+
+    itens.push({ especieId, quantidade });
+    total += quantidade;
+  }
+
+  const ids = itens.map((item) => item.especieId);
+
+  if (itens.length === 0 || total > 5 || new Set(ids).size !== ids.length) {
+    return voltar("dados");
+  }
+
+  try {
+    await mongoose.connection.transaction(async (session) => {
+      const retirada = await Retirada.findById(req.params.id).session(session);
+
+      if (!retirada || retirada.situacao !== "Concluída") {
+        throw new Error("retirada");
+      }
+
+      const anteriores = retirada.itens?.length
+        ? retirada.itens
+        : [
+            {
+              especieId: retirada.especieId,
+              quantidade: retirada.quantidade,
+            },
+          ];
+
+      const periodo = 30 * 24 * 60 * 60 * 1000;
+      const data = retirada.dataRetirada.getTime();
+
+      const outras = await Retirada.find({
+        _id: { $ne: retirada._id },
+        municipeId: retirada.municipeId,
+        situacao: "Concluída",
+        dataRetirada: {
+          $gt: new Date(data - periodo),
+          $lt: new Date(data + periodo),
+        },
+      }).session(session);
+
+      const historico = outras.map((registro) => ({
+        data: registro.dataRetirada.getTime(),
+        total: registro.itens?.length
+          ? registro.itens.reduce((soma, item) => soma + item.quantidade, 0)
+          : registro.quantidade || 0,
+      }));
+
+      historico.push({ data, total });
+
+      for (const registro of historico) {
+        const totalPeriodo = historico
+          .filter(
+            (item) =>
+              item.data <= registro.data && item.data > registro.data - periodo,
+          )
+          .reduce((soma, item) => soma + item.total, 0);
+
+        if (totalPeriodo > 5) {
+          throw new Error("limite");
+        }
+      }
+
+      const estoqueAnterior = new Map();
+      const estoqueNovo = new Map();
+
+      for (const item of anteriores) {
+        const id = String(item.especieId);
+        estoqueAnterior.set(
+          id,
+          (estoqueAnterior.get(id) || 0) + item.quantidade,
+        );
+      }
+
+      for (const item of itens) {
+        estoqueNovo.set(item.especieId, item.quantidade);
+      }
+
+      const especies = new Set([
+        ...estoqueAnterior.keys(),
+        ...estoqueNovo.keys(),
+      ]);
+
+      for (const id of especies) {
+        const quantidadeAnterior = estoqueAnterior.get(id) || 0;
+        const quantidadeNova = estoqueNovo.get(id) || 0;
+        const diferenca = quantidadeAnterior - quantidadeNova;
+
+        if (diferenca === 0) {
+          continue;
+        }
+
+        const filtro = { _id: id };
+
+        if (diferenca < 0) {
+          filtro.ativa = true;
+          filtro.estoque = { $gte: -diferenca };
+        }
+
+        const resultado = await Especie.updateOne(
+          filtro,
+          { $inc: { estoque: diferenca } },
+          { session },
+        );
+
+        if (resultado.matchedCount !== 1) {
+          throw new Error("estoque");
+        }
+      }
+
+      retirada.itens = itens;
+      retirada.especieId = undefined;
+      retirada.quantidade = undefined;
+
+      await retirada.save({ session });
+    });
+
+    res.redirect("/retiradas/lst?atualizado=1");
+  } catch (erro) {
+    console.error("Erro ao editar retirada:", erro);
+
+    if (erro.message === "limite") {
+      return voltar("limite");
+    }
+
+    if (erro.message === "estoque") {
+      return voltar("estoque");
+    }
+
+    voltar("falha");
   }
 });
 

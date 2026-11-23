@@ -1,0 +1,85 @@
+<%- include("../partials/cabecalho", { titulo }) %>
+
+  <h1 class="h3 mb-4">Editar Retirada</h1>
+
+  <% if (erro) { %>
+    <div class="alert alert-danger" role="alert">
+      <%= erro %>
+    </div>
+    <% } %>
+
+      <form action="/retiradas/edit/<%= retirada._id %>" method="POST">
+
+        <div class="mb-3">
+          <label class="form-label">Munícipe</label>
+          <input type="text" class="form-control"
+            value="<%= retirada.municipeId?.nome || 'Não encontrado' %> - CPF: <%= retirada.municipeId?.cpf || 'Não informado' %>"
+            readonly>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label">Data da retirada</label>
+          <input type="text" class="form-control"
+            value="<%= retirada.dataRetirada.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }) %>"
+            readonly>
+        </div>
+
+        <h2 class="h5 mb-3">Mudas retiradas</h2>
+
+        <% for (let i=0; i < 5; i++) { %>
+          <% const itemAtual=itensAtuais[i] || { especieId: "" , quantidade: "" }; %>
+
+            <div class="row g-3 mb-3">
+
+              <div class="col-md-8">
+                <label for="especie<%= i %>" class="form-label">
+                  Espécie <%= i + 1 %>
+                </label>
+
+                <select class="form-select" id="especie<%= i %>" name="especieIds[]" <%=i===0 ? "required" : "" %>>
+
+                  <option value="">Selecione uma espécie</option>
+
+                  <% especies.forEach(especie=> { %>
+                    <% const selecionada=itemAtual.especieId===String(especie._id); %>
+
+                      <option value="<%= especie._id %>" <%=selecionada ? "selected" : "" %>
+                        <%= !especie.ativa && !selecionada ? "disabled" : "" %>>
+                          <%= especie.nomePopular %> -
+                            <%= especie.estoque %> disponíveis
+                              <%= !especie.ativa ? "(Inativa)" : "" %>
+                      </option>
+                      <% }) %>
+
+                </select>
+              </div>
+
+              <div class="col-md-4">
+                <label for="quantidade<%= i %>" class="form-label">
+                  Quantidade
+                </label>
+
+                <input type="number" class="form-control" id="quantidade<%= i %>" name="quantidades[]" min="1" max="5"
+                  step="1" value="<%= itemAtual.quantidade %>" <%=i===0 ? "required" : "" %>>
+              </div>
+
+            </div>
+
+            <% } %>
+
+              <p class="text-secondary small mb-4">
+                Limite de 5 mudas por período de 30 dias.
+                Preencha apenas as espécies desejadas.
+              </p>
+
+              <button type="submit" class="btn btn-success">
+                Salvar alterações
+              </button>
+
+              <a href="/retiradas/lst" class="btn btn-secondary">
+                Cancelar
+              </a>
+
+      </form>
+
+      <%- include("../partials/rodape") %>
